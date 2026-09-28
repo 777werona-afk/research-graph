@@ -1,0 +1,96 @@
+[project]
+name = "research-graph"
+version = "0.1.0"
+description = "Сбор и анализ графа исследовательских репозиториев и публикаций"
+readme = "README.md"
+authors = [
+    { name = "Марина Кожевяткина", email = "319156690+777werona-afk@users.noreply.github.com" },
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "typer>=0.15",
+]
+
+[project.scripts]
+rg = "research_graph.cli:app"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "pre-commit>=4.0",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.10.0"]
+build-backend = "uv_build"
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
+    "T20", # запрет print в коде
+    "PTH", # pathlib вместо os.path
+    "S",   # bandit (безопасность)
+]
+# E501 — зона ответственности форматтера;
+# RUF001-003 — ложные срабатывания на кириллицу в строках/докстрингах/комментариях
+ignore = ["E501", "RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]  # assert в тестах — норма
+
+[tool.ruff.format]
+quote-style = "double"
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+files = ["src", "tests"]
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --cov=research_graph --cov-report=term-missing --cov-fail-under=90"
+markers = [
+    "slow: медленные тесты (сейчас не используются, объявлены для примера)",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src/research_graph"]
+omit = ["*/__main__.py"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
